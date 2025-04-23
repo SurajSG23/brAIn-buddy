@@ -5,11 +5,11 @@ import Footer from "./components/custom/Footer";
 
 const App = () => (
   <div className="w-full min-h-[100vh] flex flex-col justify-between items-center ">
-    {/* <Header /> */}
+    <Header />
     <Routes>
       <Route path="/" element={<LandingPage />} />
     </Routes>
-    {/* <Footer /> */}
+    <Footer />
   </div>
 );
 
