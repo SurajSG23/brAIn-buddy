@@ -6,7 +6,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 
 const HomePage = () => {
-
   const [isCreating, setIsCreating] = useState(false);
   const [projects, setProjects] = useState<
     { id: string; name: string; date: string }[]
@@ -17,7 +16,6 @@ const HomePage = () => {
   };
 
   const handleUploadPdf = () => {
-    // Mock implementation of PDF upload
     const newProject = {
       id: `project-${Date.now()}`,
       name: `Study Material ${projects.length + 1}`,
@@ -32,8 +30,9 @@ const HomePage = () => {
     onAuthStateChanged(auth, (user) => {
       setUser(user?.displayName || "");
     });
-  
   }, [auth]);
+
+
 
   return (
     <div className="min-h-screen bg-zinc-900 w-full">
@@ -101,7 +100,7 @@ const HomePage = () => {
                   >
                     Upload & Create
                   </Button>
-                </div>  
+                </div>
               </div>
             </Card>
           ) : null}

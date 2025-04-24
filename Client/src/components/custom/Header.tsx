@@ -1,39 +1,80 @@
 import { useLocation } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const [displayPic, setDisplayPic] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!currentUser) {
-        navigate("/");
-      }
-    });
-    return () => unsubscribe();
+    setLoading(true);
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (!currentUser) {
+          // navigate("/");
+        }
+        if (currentUser?.photoURL) {
+          setDisplayPic(currentUser.photoURL);
+          setDisplayName(currentUser.displayName);
+        } else {
+          setDisplayPic(null);
+        }
+      });
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [auth, navigate]);
+
+  if (loading) {
+    return (
+      <>
+        <div className="flex absolute top-0 justify-center items-center h-screen bg-gray-900 w-full z-99 ">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
+            <p className="text-white mt-4 text-lg font-semibold">Loading...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <header className="flex justify-between items-center bg-[#08090c] w-full p-3">
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center max-[395px]:w-[150px] max-[395px]:ml-3">
         <img src="favicon.png" alt="" width={35} />
         <img src="logo.png" alt="" width={200} />
       </div>
-      {location.pathname === "/homepage" ? (
-        <div>
+      {location.pathname === "/" ? (
+        ""
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          <div>
+            <img
+              src={displayPic ? displayPic : "default-profile.jpg"}
+              alt="Profile Picture"
+              className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden border-2 border-orange-500 cursor-pointer"
+              onError={(e) => (e.currentTarget.src = "default-profile.jpg")}
+              title={displayName ? displayName : "User"}
+            />
+          </div>
           <button
             className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
             onClick={() => {
@@ -43,8 +84,6 @@ const Header = () => {
             <MdLogout /> Logout
           </button>
         </div>
-      ) : (
-        ""
       )}
     </header>
   );
