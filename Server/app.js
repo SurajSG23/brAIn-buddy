@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-// import registerRouter from "./routes/registerRouter.js";
+import registerRouter from "./routes/register.route.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
@@ -25,6 +25,6 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// app.use("/register", registerRouter);
+app.use("/register", registerRouter);
 
 app.listen(PORT);

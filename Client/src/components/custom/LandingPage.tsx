@@ -20,6 +20,7 @@ import gsap from "gsap";
 import TextGenerateEffect from "../ui/text-generate-effect";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import axios from "axios";
 
 const LandingPage = () => {
   useGSAP(() => {
@@ -31,8 +32,8 @@ const LandingPage = () => {
       ease: "sine.inOut",
     });
   });
-  const provider = new GoogleAuthProvider();
 
+  const provider = new GoogleAuthProvider();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,13 +50,35 @@ const LandingPage = () => {
       const name = result.user.displayName;
       const email = result.user.email;
       const profilepic = result.user.photoURL;
-      console.log(name, email, profilepic);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/register/signin`,
+        {
+          name,
+          email,
+          profilepic,
+        }
+      );
+      console.log("User data sent to server:", response.data);
     } catch (error) {
       console.error("Login failed:", error);
     } finally {
       navigate("/homepage");
     }
   };
+
+  // if (loading) {
+  //   return (
+  //     <>
+  //       <div className="flex absolute top-0 justify-center items-center h-screen bg-gray-900 w-full z-99">
+  //         <div className="flex flex-col items-center">
+  //           <div className="w-16 h-16 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
+  //           <p className="text-white mt-4 text-lg font-semibold">Loading...</p>
+  //         </div>
+  //       </div>
+  //     </>
+  //   );
+  // }
+
   return (
     <div className="bg-[#1A1F2C] min-h-[screen] w-full ">
       <section className="relative pt-20 pb-40 overflow-hidden min-h-[80vh] flex justify-center items-center">
