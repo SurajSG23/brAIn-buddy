@@ -12,7 +12,7 @@ const projectSchema = mongoose.Schema(
     },
     convertedPDF: {
       type: String,
-      default: "",
+      required: true,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

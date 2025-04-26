@@ -1,3 +1,6 @@
+"use client";
+
+import "../../lib/setupPdfWorker.ts";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/card";
@@ -6,8 +9,19 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getDocument } from "pdfjs-dist";
+import { TextItem } from "pdfjs-dist/types/src/display/api";
+import { MultiStepLoader as Loader } from "../ui/multi-step-loader";
+
+const loadingStates = [
+  { text: "Uploading PDF..." },
+  { text: "Extracting Text..." },
+  { text: "Uploading Text File..." },
+  { text: "Saving Project..." },
+];
 
 const HomePage = () => {
+  const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [projects, setProjects] = useState<
     { id: string; name: string; date: string; url: string }[]
@@ -18,47 +32,112 @@ const HomePage = () => {
   } | null>(null);
 
   const [userId, setUserId] = useState<string>("");
+
   const handleCreateProject = () => {
     setIsCreating(true);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || file.type !== "application/pdf") {
-      toast.error("Please upload a valid PDF file.");
-      return 
-    }
+    setLoading(true);
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("PDF must be less than 5MB.");
-      return 
-    }
-
-    const formData = new FormData();
-    formData.append("pdf", file);
-   
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/uploadimagekit/upload-pdf`,
-        formData
-      );
+      const file = e.target.files?.[0];
 
-      const pdfUrl = response.data.data.url;
+      if (!file || file.type !== "application/pdf") {
+        toast.error("Please upload a valid PDF file.");
+        return;
+      }
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/register/addproject`,
-        {
-          user: userId,
-          originalPDF: pdfUrl,
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("PDF must be less than 5MB.");
+        return;
+      }
+
+      // 1. Upload PDF to ImageKit
+      let pdfUrl = "";
+      try {
+        const formData = new FormData();
+        formData.append("pdf", file);
+
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/uploadimagekit/upload-pdf`,
+          formData
+        );
+
+        pdfUrl = response.data.data.url;
+      } catch (error) {
+        toast.error("Failed to upload PDF to server.");
+        throw error;
+      }
+
+      // 2. Extract text from PDF
+      let fullText = "";
+      try {
+        const loadingTask = getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const content = await page.getTextContent();
+
+          const pageText = content.items
+            .filter((item): item is TextItem => "str" in item)
+            .map((item) => item.str)
+            .join(" ");
+
+          fullText += pageText + "\n";
         }
-      );
-      setProjects([])
-      console.log("✅ userid:", userId);
-      console.log("✅ Project created:", res.data);
-      toast.success("Project created successfully!");
+      } catch (error) {
+        toast.error("Failed to extract text from PDF.");
+        throw error;
+      }
+
+      // 3. Upload extracted text to Cloudinary
+      let textFileUrl = "";
+      try {
+        const blob = new Blob([fullText], { type: "text/plain" });
+
+        const formData2 = new FormData();
+        formData2.append("file", blob, "extracted-text.txt");
+        formData2.append(
+          "upload_preset",
+          import.meta.env.VITE_CLOUD_PRESET_NAME
+        );
+
+        const cloudinaryResponse = await axios.post(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUD_NAME
+          }/auto/upload`,
+          formData2
+        );
+
+        textFileUrl = cloudinaryResponse.data.secure_url;
+      } catch (error) {
+        toast.error("Failed to upload extracted text to server.");
+        throw error;
+      }
+
+      // 4. Save project info to backend
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/uploadproject/addproject`,
+          {
+            user: userId,
+            originalPDF: pdfUrl,
+            convertedPDF: textFileUrl,
+          }
+        );
+
+        setProjects([]);
+        toast.success("Project created successfully!");
+      } catch (error) {
+        toast.error("Failed to create project. Please try again.");
+        throw error;
+      }
     } catch (error) {
-      toast.error("Failed to upload PDF. Please try again.");
-      console.error("❌ Upload failed:", error);
+      console.error("❌ Something went wrong:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,14 +159,22 @@ const HomePage = () => {
         console.error("Error fetching user:", error);
       }
     });
-  }, [auth]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-900 w-full">
       <main className="max-w-7xl mx-auto px-6 py-12">
+        {loading && (
+          <Loader
+            loadingStates={loadingStates}
+            loading={loading}
+            duration={2000}
+          />
+        )}
+
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Welcome {user ? user.displayName : ""} to br 
+            Welcome {user ? user.displayName : ""} to br
             <span className="text-orange-500">AI</span>n buddy!
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">

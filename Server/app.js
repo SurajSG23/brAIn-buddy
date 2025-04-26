@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import registerRouter from "./routes/register.route.js";
 import uploadRouter from "./routes/uploadimagekit.route.js";
+import projectRouter from "./routes/project.route.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser"; // Import body-parser
@@ -33,5 +34,6 @@ app.get("/", (req, res) => {
 
 app.use("/register", registerRouter);
 app.use("/uploadimagekit", uploadRouter);
+app.use("/uploadproject", projectRouter);
 
 app.listen(PORT);

@@ -32,7 +32,6 @@ const Header = () => {
           setDisplayPic(currentUser?.photoURL);
           setDisplayName(currentUser?.displayName);
         }
-
       });
       return () => unsubscribe();
     } catch (error) {
@@ -41,6 +40,8 @@ const Header = () => {
       setLoading(false);
     }
   }, [auth, navigate]);
+
+  useEffect(() => {}, []);
 
   if (loading) {
     return (
@@ -65,15 +66,16 @@ const Header = () => {
         ""
       ) : (
         <div className="flex items-center justify-center gap-2">
-          <div>
+          <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden border-2 border-orange-500 cursor-pointer">
             <img
               src={displayPic ? displayPic : "default-profile.jpg"}
               alt="Profile Picture"
-              className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden border-2 border-orange-500 cursor-pointer"
+              className="w-full h-full object-cover"
               onError={(e) => (e.currentTarget.src = "default-profile.jpg")}
               title={displayName ? displayName : "User"}
             />
           </div>
+
           <button
             className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
             onClick={() => {

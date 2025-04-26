@@ -26,22 +26,6 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-router.post("/addproject", async (req, res) => {
-  try {
-    const { user, originalPDF } = req.body;
-    console.log(user, originalPDF);
-    const updatedUser = await projectModel.create(
-      {
-        user,
-        originalPDF,
-      }
-    );
-    console.log(updatedUser);
-    res.send(updatedUser);
-  } catch (error) {
-    res.json({ message: error.message, status: 500 });
-  }
-});
 
 router.get("/getuser/:email", async (req, res) => {
   try {
