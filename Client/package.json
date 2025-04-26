@@ -40,7 +40,8 @@
     "sonner": "^2.0.3",
     "styled-components": "^6.1.16",
     "tailwind-merge": "^3.1.0",
-    "three": "^0.175.0"
+    "three": "^0.175.0",
+    "uploadthing": "^7.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

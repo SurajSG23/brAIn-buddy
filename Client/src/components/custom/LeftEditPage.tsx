@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import  { useRef } from "react";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/card";
 import {
@@ -137,8 +137,9 @@ const LeftEditPage = () => {
       <div
         ref={editorRef}
         contentEditable
-        className="w-full h-full p-4 rounded-xl border border-white/20 bg-black/20 backdrop-blur-sm overflow-y-auto outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+        className="w-full h-full p-4 rounded-xl border border-white/20 bg-black/20 backdrop-blur-sm overflow-y-auto outline-none text-xl focus:ring-2 focus:ring-orange-500/50 transition-all empty:before:content-[attr(data-placeholder)] empty:before:text-gray-500 empty:before:pointer-events-none"
         style={{ minHeight: "400px" }}
+        data-placeholder="Type your notes here..."
         suppressContentEditableWarning
       />
     </Card>

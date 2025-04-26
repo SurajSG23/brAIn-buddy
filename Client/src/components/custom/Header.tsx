@@ -26,14 +26,13 @@ const Header = () => {
     try {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         if (!currentUser) {
-          // navigate("/");
+          navigate("/");
         }
-        if (currentUser?.photoURL) {
-          setDisplayPic(currentUser.photoURL);
-          setDisplayName(currentUser.displayName);
-        } else {
-          setDisplayPic(null);
+        if (currentUser) {
+          setDisplayPic(currentUser?.photoURL);
+          setDisplayName(currentUser?.displayName);
         }
+
       });
       return () => unsubscribe();
     } catch (error) {
