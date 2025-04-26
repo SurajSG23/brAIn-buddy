@@ -5,6 +5,7 @@ import { FiUpload, FiPlus, FiFileText } from "react-icons/fi";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const HomePage = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -24,7 +25,13 @@ const HomePage = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || file.type !== "application/pdf") {
-      return console.error("Please upload a valid PDF file.");
+      toast.error("Please upload a valid PDF file.");
+      return 
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("PDF must be less than 5MB.");
+      return 
     }
 
     const formData = new FormData();
@@ -45,9 +52,12 @@ const HomePage = () => {
           originalPDF: pdfUrl,
         }
       );
+      setProjects([])
       console.log("✅ userid:", userId);
       console.log("✅ Project created:", res.data);
+      toast.success("Project created successfully!");
     } catch (error) {
+      toast.error("Failed to upload PDF. Please try again.");
       console.error("❌ Upload failed:", error);
     }
   };
@@ -121,7 +131,7 @@ const HomePage = () => {
                     </div>
                     <p className="text-gray-300">Click to upload</p>
                     <p className="text-gray-400 text-sm">
-                      PDF files only (max 50MB)
+                      PDF files only (max 5MB)
                     </p>
                   </div>
                 </label>
