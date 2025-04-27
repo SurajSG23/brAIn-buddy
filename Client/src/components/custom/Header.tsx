@@ -26,7 +26,7 @@ const Header = () => {
     try {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         if (!currentUser) {
-          navigate("/");
+          // navigate("/");
         }
         if (currentUser) {
           setDisplayPic(currentUser?.photoURL);
