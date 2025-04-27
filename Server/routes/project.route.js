@@ -7,7 +7,6 @@ router.post("/addproject", async (req, res) => {
   try {
     const { user, originalPDF, convertedPDF, title, fileIdFromImageKit } =
       req.body;
-    console.log(user, originalPDF);
     const updatedUser = await projectModel.create({
       user,
       originalPDF,
@@ -15,10 +14,36 @@ router.post("/addproject", async (req, res) => {
       title,
       fileIdFromImageKit,
     });
-    console.log(updatedUser);
     res.send(updatedUser);
   } catch (error) {
     res.json({ message: error.message, status: 500 });
+  }
+});
+
+router.post("/openproject/:id", async (req, res) => {
+  try {
+    await projectModel.findByIdAndUpdate(req.params.id, {
+      isOpen: true,
+    });
+    res.send("success");
+  } catch (error) {
+    res.json({ message: error.message, status: 500 });
+  }
+});
+
+router.post("/closeproject", async (req, res) => {
+  try {
+    await projectModel.findOneAndUpdate(
+      {
+        isOpen: true,
+      },
+      {
+        isOpen: false,
+      }
+    );
+    res.send("success");
+  } catch (error) {
+    res.json({ message: "No projects to close", status: 500 });
   }
 });
 
@@ -31,6 +56,15 @@ router.get("/getprojects/:id", async (req, res) => {
     res.send(projects);
   } catch (error) {
     res.json({ message: error.message, status: 500 });
+  }
+});
+
+router.get("/openedProject", async (req, res) => {
+  try {
+    const project = await projectModel.find({ isOpen: true });
+    res.send(project);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

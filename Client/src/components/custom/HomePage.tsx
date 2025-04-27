@@ -13,6 +13,7 @@ import { getDocument } from "pdfjs-dist";
 import { TextItem } from "pdfjs-dist/types/src/display/api";
 import { MultiStepLoader as Loader } from "../ui/multi-step-loader";
 import { FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const loadingStates = [
   { text: "Uploading PDF..." },
@@ -33,9 +34,8 @@ const HomePage = () => {
     displayName: string;
     email: string;
   } | null>(null);
-
+  const navigate = useNavigate();
   const [userId, setUserId] = useState<string>("");
-
   const handleCreateProject = () => {
     setIsCreating(true);
   };
@@ -182,7 +182,7 @@ const HomePage = () => {
             user: userId,
             originalPDF: pdfUrl,
             convertedPDF: textFileUrl,
-            title: title,
+            title: title.charAt(0).toUpperCase() + title.slice(1),
             fileIdFromImageKit: pdfID,
           }
         );
@@ -227,6 +227,17 @@ const HomePage = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const openProject = async (id: string) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`
+      );
+      navigate("/editpage", { replace: true });
+    } catch (error) {
+      console.error("Error opening project:", error);
+    }
+  };
 
   if (loadingPage) {
     return (
@@ -349,42 +360,44 @@ const HomePage = () => {
               </Card>
             ) : (
               projects.map((project) => (
-                <Card
-                  key={project.id}
-                  className="bg-gray-800/70 hover:border-orange-500 transition-all duration-300 shadow-lg p-6 cursor-pointer hover:shadow-xl"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="text-orange-500 text-xl">
-                      <FiFileText />
+                <>
+                  <Card
+                    key={project.id}
+                    className="bg-gray-800/70 hover:border-orange-500 transition-all duration-300 shadow-lg p-6 cursor-pointer hover:shadow-xl"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-orange-500 text-xl">
+                        <FiFileText />
+                      </div>
+                      <span className="text-gray-400 text-sm">
+                        {project.date}
+                      </span>
                     </div>
-                    <span className="text-gray-400 text-sm">
-                      {project.date}
-                    </span>
-                  </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">
-                    {project.name}
-                  </h4>
-                  <p className="text-gray-300 text-sm mb-4">
-                    Click to open this study project and ask questions
-                  </p>
-                  <div className="mt-4 text-orange-500 text-sm flex justify-between items-center">
-                    <p
-                      className="flex items-center gap-2 cursor-pointer hover:scale-130 duration-200 hover:text-red-700"
-                      onClick={() => {
-                        deleteProject(project.id);
-                      }}
-                    >
-                      <FaTrash />
-                    </p>
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Open Project →
-                    </a>
-                  </div>
-                </Card>
+                    <h4 className="text-lg font-semibold text-white mb-2">
+                      {project.name}
+                    </h4>
+                    <div className="mt-6 text-sm flex justify-between items-center">
+                      <p
+                        className="flex items-center gap-1 cursor-pointer text-gray-600 hover:text-red-700 duration-200 transition-all ease-in-out transform hover:scale-110"
+                        onClick={() => {
+                          deleteProject(project.id);
+                        }}
+                      >
+                        <FaTrash className="text-xl" />
+                        <span className="">Delete Project</span>
+                      </p>
+
+                      <p
+                        onClick={() => {
+                          openProject(project.id);
+                        }}
+                        className="text-orange-500 text-lg hover:text-orange-700 cursor-pointer transition-all duration-200 ease-in-out font-semibold"
+                      >
+                        <span>Open Project →</span>
+                      </p>
+                    </div>
+                  </Card>
+                </>
               ))
             )}
           </div>

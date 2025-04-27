@@ -1,14 +1,52 @@
+import { useEffect, useState } from "react";
 import LeftEditPage from "./LeftEditPage";
 import RightEditPage from "./RightEditPage";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const EditPage = () => {
+  const navigate = useNavigate();
+  const [pdfURL, setPdfURL] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
+  const [loadingPage, setLoadingPage] = useState(true);
+
+  useEffect(() => {
+    setLoadingPage(true);
+    const fetchProjects = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/project/openedProject`
+        );
+        setPdfURL(res.data[0].originalPDF);
+        setTitle(res.data[0].title);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoadingPage(false);
+      }
+    };
+    fetchProjects();
+  }, [navigate]);
+  if (loadingPage) {
+    return (
+      <>
+        <div className="flex absolute top-0 justify-center items-center h-screen bg-gray-900 w-full z-99 ">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
+            <p className="text-white mt-4 text-lg font-semibold">Loading...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-row w-full justify-evenly items-center text-white gap-1 max-[850px]:flex-col">
       <div className="w-[50%] max-[850px]:w-full">
         <LeftEditPage />
       </div>
       <div className="w-[50%] max-[850px]:w-full">
-        <RightEditPage />
+        <RightEditPage title={title} pdfURL={pdfURL} />
       </div>
     </div>
   );

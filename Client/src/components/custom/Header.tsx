@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Header = () => {
     try {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         if (!currentUser) {
-          // navigate("/");
+          navigate("/");
         }
         if (currentUser) {
           setDisplayPic(currentUser?.photoURL);
@@ -41,7 +42,22 @@ const Header = () => {
     }
   }, [auth, navigate]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (window.location.pathname === "/homepage") {
+      closeProject();
+    }
+  }, [navigate]);
+
+  const closeProject = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/project/closeproject`
+      );
+      navigate("/homepage");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   if (loading) {
     return (
@@ -75,15 +91,25 @@ const Header = () => {
               title={displayName ? displayName : "User"}
             />
           </div>
-
-          <button
-            className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
-            onClick={() => {
-              handleLogout();
-            }}
-          >
-            <MdLogout /> Logout
-          </button>
+          {location.pathname === "/editpage" ? (
+            <button
+              className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
+              onClick={() => {
+                closeProject();
+              }}
+            >
+              <MdLogout /> Back
+            </button>
+          ) : (
+            <button
+              className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
+              onClick={() => {
+                handleLogout();
+              }}
+            >
+              <MdLogout /> Logout
+            </button>
+          )}
         </div>
       )}
     </header>
