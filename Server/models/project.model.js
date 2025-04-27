@@ -18,6 +18,11 @@ const projectSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
+    fileIdFromImageKit: {
+      type: String,
+      required: true,
+      default: null,
+    },
   },
   { timestamps: true }
 );

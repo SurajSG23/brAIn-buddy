@@ -19,17 +19,17 @@ uploadRouter.post('/upload-pdf', upload.single('pdf'), async (req, res) => {
   const sanitizedFileName = sanitizeFileName(originalname); 
 
   try {
-
     const uploadResponse = await imagekit.upload({
       file: buffer,
       fileName: sanitizedFileName, 
       folder: '/pdfs/', 
       isPrivateFile: false, 
     });
-
+    console.log('PDF uploaded to ImageKit:', uploadResponse.fileId);
     res.json({
       message: 'PDF uploaded successfully',
       data: {
+        fileId: uploadResponse.fileId,
         url: uploadResponse.url,  
         name: uploadResponse.name,
       },

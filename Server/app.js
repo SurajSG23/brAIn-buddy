@@ -6,7 +6,7 @@ import uploadRouter from "./routes/uploadimagekit.route.js";
 import projectRouter from "./routes/project.route.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
-import bodyParser from "body-parser"; // Import body-parser
+import bodyParser from "body-parser"; 
 
 connectDB();
 dotenv.config();
@@ -14,9 +14,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Increase the max file upload size limit
-app.use(bodyParser.json({ limit: "50mb" })); // Increase for base64 files (JSON requests)
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true })); // For URL-encoded files (form requests)
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.use(
   cors({
@@ -34,6 +33,6 @@ app.get("/", (req, res) => {
 
 app.use("/register", registerRouter);
 app.use("/uploadimagekit", uploadRouter);
-app.use("/uploadproject", projectRouter);
+app.use("/project", projectRouter);
 
 app.listen(PORT);

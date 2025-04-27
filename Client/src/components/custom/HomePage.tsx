@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { getDocument } from "pdfjs-dist";
 import { TextItem } from "pdfjs-dist/types/src/display/api";
 import { MultiStepLoader as Loader } from "../ui/multi-step-loader";
+import { FaTrash } from "react-icons/fa";
 
 const loadingStates = [
   { text: "Uploading PDF..." },
@@ -23,9 +24,11 @@ const loadingStates = [
 const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [title, setTitle] = useState("");
   const [projects, setProjects] = useState<
     { id: string; name: string; date: string; url: string }[]
   >([]);
+  const [loadingPage, setLoadingPage] = useState(true);
   const [user, setUser] = useState<{
     displayName: string;
     email: string;
@@ -35,6 +38,58 @@ const HomePage = () => {
 
   const handleCreateProject = () => {
     setIsCreating(true);
+  };
+
+  const fetchProjects = async (id: string) => {
+    if (!id) {
+      console.error("User ID is not available.");
+      return;
+    }
+    setLoadingPage(true);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/project/getprojects/${id}`
+      );
+      const projectsData = response.data.map(
+        (project: {
+          _id: string;
+          title: string;
+          originalPDF: string;
+          createdAt: string;
+          convertedPDF: string;
+        }) => ({
+          id: project._id,
+          name: project.title,
+          date: new Date(project.createdAt).toLocaleDateString(),
+          url: project.originalPDF,
+        })
+      );
+      setProjects(projectsData);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoadingPage(false);
+    }
+  };
+
+  const deleteProject = async (id: string) => {
+    if (!userId) {
+      console.error("User ID is not available.");
+      return;
+    }
+    setLoadingPage(true);
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/project/deleteproject/${id}`
+      );
+      toast.success("Project deleted successfully!");
+      fetchProjects(userId);
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project. Please try again.");
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +110,7 @@ const HomePage = () => {
 
       // 1. Upload PDF to ImageKit
       let pdfUrl = "";
+      let pdfID = "";
       try {
         const formData = new FormData();
         formData.append("pdf", file);
@@ -65,6 +121,7 @@ const HomePage = () => {
         );
 
         pdfUrl = response.data.data.url;
+        pdfID = response.data.data.fileId;
       } catch (error) {
         toast.error("Failed to upload PDF to server.");
         throw error;
@@ -120,11 +177,13 @@ const HomePage = () => {
       // 4. Save project info to backend
       try {
         await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/uploadproject/addproject`,
+          `${import.meta.env.VITE_BACKEND_URL}/project/addproject`,
           {
             user: userId,
             originalPDF: pdfUrl,
             convertedPDF: textFileUrl,
+            title: title,
+            fileIdFromImageKit: pdfID,
           }
         );
 
@@ -137,29 +196,50 @@ const HomePage = () => {
     } catch (error) {
       console.error("❌ Something went wrong:", error);
     } finally {
+      setTitle("");
+      fetchProjects(userId);
+      setIsCreating(false);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(
         user
           ? { displayName: user.displayName || "", email: user.email || "" }
           : null
       );
-      try {
-        if (user?.email) {
+
+      if (user?.email) {
+        try {
           const userFound = await axios.get(
             `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${user.email}`
           );
           setUserId(userFound.data._id);
+
+          fetchProjects(userFound.data._id);
+        } catch (error) {
+          console.error("Error fetching user:", error);
         }
-      } catch (error) {
-        console.error("Error fetching user:", error);
       }
     });
+
+    return () => unsubscribe();
   }, []);
+
+  if (loadingPage) {
+    return (
+      <>
+        <div className="flex absolute top-0 justify-center items-center h-screen bg-gray-900 w-full z-99 ">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
+            <p className="text-white mt-4 text-lg font-semibold">Loading...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-900 w-full">
@@ -197,37 +277,49 @@ const HomePage = () => {
           {isCreating && (
             <Card className="p-8 bg-gray-800/70 shadow-lg mb-8">
               <div className="text-center">
-                <h4 className="text-xl font-semibold text-white mb-4">
-                  Upload Study Material
-                </h4>
-                <p className="text-gray-300 mb-8">
-                  Upload a PDF file that contains your study material
-                </p>
+                <div className="w-full justify-center items-center text-white">
+                  <input
+                    type="text"
+                    className="w-full p-3 mb-3 text-white rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-gray-400 text-base"
+                    placeholder="Add project title"
+                    required
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                    }}
+                  />
+                </div>
 
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="pdf-upload"
-                />
-                <label htmlFor="pdf-upload" className="cursor-pointer">
-                  <div className="border-2 border-dashed border-gray-500 rounded-lg p-12 mb-6 hover:border-orange-500 transition-colors">
-                    <div className="text-orange-500 text-5xl mb-4 flex justify-center">
-                      <FiUpload />
-                    </div>
-                    <p className="text-gray-300">Click to upload</p>
-                    <p className="text-gray-400 text-sm">
-                      PDF files only (max 5MB)
+                {title.length > 0 && (
+                  <>
+                    <p className="text-gray-200 mt-8 mb-4">
+                      Upload a PDF file that contains your study material.
                     </p>
-                  </div>
-                </label>
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="pdf-upload"
+                    />
+                    <label htmlFor="pdf-upload" className="cursor-pointer">
+                      <div className="border-2 border-dashed border-gray-500 rounded-lg p-12 mb-6 hover:border-orange-500 transition-colors">
+                        <div className="text-orange-500 text-5xl mb-4 flex justify-center">
+                          <FiUpload />
+                        </div>
+                        <p className="text-gray-300">Click to upload</p>
+                        <p className="text-gray-400 text-sm">
+                          PDF files only (max 5MB)
+                        </p>
+                      </div>
+                    </label>
+                  </>
+                )}
 
                 <div className="flex justify-end space-x-4">
                   <Button
                     variant="outline"
                     onClick={() => setIsCreating(false)}
-                    className="border-gray-500 text-gray-300 hover:text-white hover:border-white"
+                    className="border-gray-500 text-gray-300 hover:text-white hover:border-white cursor-pointer"
                   >
                     Cancel
                   </Button>
@@ -275,7 +367,15 @@ const HomePage = () => {
                   <p className="text-gray-300 text-sm mb-4">
                     Click to open this study project and ask questions
                   </p>
-                  <div className="mt-4 text-orange-500 text-sm flex justify-end">
+                  <div className="mt-4 text-orange-500 text-sm flex justify-between items-center">
+                    <p
+                      className="flex items-center gap-2 cursor-pointer hover:scale-130 duration-200 hover:text-red-700"
+                      onClick={() => {
+                        deleteProject(project.id);
+                      }}
+                    >
+                      <FaTrash />
+                    </p>
                     <a
                       href={project.url}
                       target="_blank"

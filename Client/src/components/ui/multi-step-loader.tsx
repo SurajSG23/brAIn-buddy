@@ -50,7 +50,7 @@ const LoaderCore = ({
     <div className="flex relative justify-start max-w-xl mx-auto flex-col mt-40">
       {loadingStates.map((loadingState, index) => {
         const distance = Math.abs(index - value);
-        const opacity = Math.max(1 - distance * 0.2, 0); // Minimum opacity is 0, keep it 0.2 if you're sane.
+        const opacity = Math.max(1 - distance * 0.2, 0); 
 
         return (
           <motion.div
@@ -69,7 +69,7 @@ const LoaderCore = ({
                   className={cn(
                     "text-black dark:text-white",
                     value === index &&
-                      "text-black dark:text-lime-500 opacity-100"
+                      "text-black dark:text-orange-500 opacity-100"
                   )}
                 />
               )}
@@ -77,7 +77,7 @@ const LoaderCore = ({
             <span
               className={cn(
                 "text-black dark:text-white",
-                value === index && "text-black dark:text-lime-500 opacity-100"
+                value === index && "text-black dark:text-orange-500 opacity-100"
               )}
             >
               {loadingState.text}
