@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/card";
 import {
@@ -15,6 +15,7 @@ import { RiGeminiLine } from "react-icons/ri";
 import GeminiQuestion from "../../gemini/QuestionPrompt";
 import { AIchatSession } from "../../gemini/AiModel";
 import { FaDownload } from "react-icons/fa";
+import { Document, Paragraph, TextRun, Packer } from "docx";
 
 interface RightEditPageProps {
   txtURL: string;
@@ -23,6 +24,12 @@ interface RightEditPageProps {
 const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [accept, setAccept] = useState(false);
+  const [editorContent, setEditorContent] = useState<string>("");
+  const lastHtml = useRef("");
+
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
   };
@@ -35,10 +42,18 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
     }
   };
 
-  const [open, setOpen] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [accept, setAccept] = useState(false);
-  const [editorContent, setEditorContent] = useState<string>("");
+  useEffect(() => {
+    const preventRefresh = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", preventRefresh);
+
+    return () => {
+      window.removeEventListener("beforeunload", preventRefresh);
+    };
+  }, []);
 
   const handleAdd = () => {
     const newText = `<br/> <b>${question}</b> <br/><b>Answer:</b> ${geminiAnswer}<br/>`;
@@ -78,6 +93,110 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
       setLoading(false);
     }
   };
+
+  const downloadDocx = () => {
+    if (!editorRef.current) return;
+
+    const html = editorRef.current.innerHTML;
+
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const docChildren: Paragraph[] = [];
+
+    const processNodes = (nodes: NodeListOf<ChildNode>) => {
+      nodes.forEach((node) => {
+        if (
+          node.nodeType === Node.TEXT_NODE &&
+          node.textContent &&
+          node.textContent.trim() !== ""
+        ) {
+          docChildren.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: node.textContent.replace(/&nbsp;/g, " ").trim(),
+                  size: 24,
+                }),
+              ],
+              spacing: { after: 200 },
+            })
+          );
+        } else if (node.nodeName === "BR") {
+          docChildren.push(
+            new Paragraph({
+              spacing: { after: 200 },
+            })
+          );
+        } else if (node.nodeName === "B" || node.nodeName === "STRONG") {
+          const text = node.textContent
+            ? node.textContent.replace(/&nbsp;/g, " ").trim()
+            : "";
+          if (text) {
+            docChildren.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: text,
+                    bold: true,
+                    size: 28,
+                    color: "000000",
+                  }),
+                ],
+                spacing: { after: 100 },
+              })
+            );
+          }
+        } else if (node.nodeName === "DIV" && node.childNodes.length > 0) {
+          processNodes(node.childNodes);
+        } else if (node.childNodes && node.childNodes.length > 0) {
+          processNodes(node.childNodes);
+        }
+      });
+    };
+
+    processNodes(tempDiv.childNodes);
+
+    if (docChildren.length === 0) {
+      toast.error("No content to download");
+      return;
+    }
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: docChildren,
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Notes.docx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+    toast.success("Downloaded successfully!");
+  };
+
+  const handleInput = () => {
+    if (editorRef.current && editorRef.current.innerHTML !== lastHtml.current) {
+      lastHtml.current = editorRef.current.innerHTML;
+      setEditorContent(lastHtml.current);
+    }
+  };
+
+  useEffect(() => {
+    if (editorRef.current && editorContent !== lastHtml.current) {
+      editorRef.current.innerHTML = editorContent;
+      lastHtml.current = editorContent;
+    }
+  }, [editorContent]);
 
   const showConfirmToast = () => {
     toast(
@@ -242,13 +361,13 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
         <Button
           variant="ghost"
           size="icon"
-          // onClick={downloadNotes()}
+          onClick={downloadDocx}
           className="hover:bg-orange-500/20 hover:text-orange-500 cursor-pointer"
           title="Download"
         >
           <FaDownload />
         </Button>
-        
+
         <Button
           variant="ghost"
           size="icon"
@@ -258,7 +377,6 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
         >
           <RiGeminiLine className="bg-gradient-to-b  text-red-400" />
         </Button>
-
 
         <Button
           variant="ghost"
@@ -277,10 +395,11 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
         contentEditable
         spellCheck="false"
         className="w-full h-full p-4 rounded-xl border border-white/20 bg-black/20 backdrop-blur-sm overflow-y-auto outline-none text-md focus:ring-2 focus:ring-orange-500/50 transition-all empty:before:content-[attr(data-placeholder)] empty:before:text-gray-500 empty:before:pointer-events-none"
-        style={{ minHeight: "400px" }}
+        style={{ minHeight: "300px" }}
         data-placeholder="Type your notes here..."
         suppressContentEditableWarning
-        dangerouslySetInnerHTML={{ __html: editorContent }}
+        onInput={handleInput}
+        onBlur={handleInput}
       />
     </Card>
   );
