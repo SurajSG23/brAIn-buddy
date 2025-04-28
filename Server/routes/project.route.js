@@ -5,14 +5,22 @@ const router = express.Router();
 
 router.post("/addproject", async (req, res) => {
   try {
-    const { user, originalPDF, convertedPDF, title, fileIdFromImageKit } =
-      req.body;
+    const {
+      user,
+      originalPDF,
+      convertedPDF,
+      title,
+      fileIdFromImageKit,
+      podcastURL,
+    } = req.body;
+    
     const updatedUser = await projectModel.create({
       user,
       originalPDF,
       convertedPDF,
       title,
       fileIdFromImageKit,
+      podcastURL,
     });
     res.send(updatedUser);
   } catch (error) {
@@ -65,13 +73,13 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/openedProject/:id", async (req, res) => {
-  console.log(req.params.id)
+  console.log(req.params.id);
   try {
     const project = await projectModel.findOne({
       user: req.params.id,
       isOpen: true,
     });
-    console.log(project)
+    console.log(project);
     res.send(project ? [project] : []);
   } catch (error) {
     res.status(500).json({ message: error.message });

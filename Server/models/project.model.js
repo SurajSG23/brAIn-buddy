@@ -27,6 +27,10 @@ const projectSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    podcastURL: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

@@ -15,6 +15,8 @@ import { MultiStepLoader as Loader } from "../ui/multi-step-loader";
 import { FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { FaPenFancy, FaPodcast, FaQuestionCircle } from "react-icons/fa";
+import PodcastPrompt from "../../gemini/PodcastPrompt.ts";
+import { AIchatSession } from "../../gemini/AiModel.ts";
 
 const loadingStates = [
   { text: "Uploading your PDF..." },
@@ -114,7 +116,7 @@ const HomePage = () => {
         return;
       }
 
-      // 1. Upload PDF to ImageKit
+      // Upload PDF to ImageKit
       let pdfUrl = "";
       let pdfID = "";
       try {
@@ -133,8 +135,9 @@ const HomePage = () => {
         throw error;
       }
 
-      // 2. Extract text from PDF
+      // Extract text from PDF
       let fullText = "";
+      let podcastURL = "";
       try {
         const loadingTask = getDocument(pdfUrl);
         const pdf = await loadingTask.promise;
@@ -150,12 +153,37 @@ const HomePage = () => {
 
           fullText += pageText + "\n";
         }
+
+        // Generate a podcast
+        const result = await AIchatSession.sendMessage(
+          PodcastPrompt.replace("###", fullText)
+        );
+
+        const GeminiPodcast =
+          result.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        const blob = new Blob([GeminiPodcast], { type: "text/plain" });
+
+        const formData2 = new FormData();
+        formData2.append("file", blob, "extracted-text.txt");
+        formData2.append(
+          "upload_preset",
+          import.meta.env.VITE_CLOUD_PRESET_NAME
+        );
+
+        const cloudinaryResponse = await axios.post(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUD_NAME
+          }/auto/upload`,
+          formData2
+        );
+        podcastURL = cloudinaryResponse.data.secure_url;
       } catch (error) {
         toast.error("Failed to extract text from PDF.");
         throw error;
       }
 
-      // 3. Upload extracted text to Cloudinary
+      // Upload extracted text to Cloudinary
       let textFileUrl = "";
       try {
         const blob = new Blob([fullText], { type: "text/plain" });
@@ -180,7 +208,7 @@ const HomePage = () => {
         throw error;
       }
 
-      // 4. Save project info to backend
+      // Save project info to backend
       try {
         await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/project/addproject`,
@@ -190,6 +218,7 @@ const HomePage = () => {
             convertedPDF: textFileUrl,
             title: title.charAt(0).toUpperCase() + title.slice(1),
             fileIdFromImageKit: pdfID,
+            podcastURL: podcastURL,
           }
         );
 
@@ -343,7 +372,7 @@ const HomePage = () => {
           <Loader
             loadingStates={loadingStates}
             loading={loading}
-            duration={2000}
+            duration={4000}
           />
         )}
 
