@@ -14,13 +14,15 @@ import { TextItem } from "pdfjs-dist/types/src/display/api";
 import { MultiStepLoader as Loader } from "../ui/multi-step-loader";
 import { FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FaPenFancy, FaPodcast, FaQuestionCircle } from "react-icons/fa";
 
 const loadingStates = [
-  { text: "Uploading PDF..." },
-  { text: "Extracting Text..." },
-  { text: "Uploading Text File..." },
-  { text: "Saving Project..." },
+  { text: "Uploading your PDF..." },
+  { text: "Creating your personalized podcast..." },
+  { text: "Generating aptitude questions for you..." },
+  { text: "Saving your project..." },
 ];
+
 
 const HomePage = () => {
   const [loading, setLoading] = useState(false);
@@ -36,9 +38,13 @@ const HomePage = () => {
   } | null>(null);
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string>("");
+  const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const handleCreateProject = () => {
     setIsCreating(true);
   };
+
+  const [select, setSelect] = useState(false);
+  const [projectID, setProjectID] = useState("");
 
   const fetchProjects = async (id: string) => {
     if (!id) {
@@ -88,6 +94,7 @@ const HomePage = () => {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project. Please try again.");
     } finally {
+      setConfirmDelete(false)
       setLoadingPage(false);
     }
   };
@@ -252,6 +259,79 @@ const HomePage = () => {
     );
   }
 
+  if (confirmDelete) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-brain-black relative">
+        <div className="relative space-y-1 w-full max-w-md mx-auto p-8 rounded-2xl bg-black/40 backdrop-blur-sm border border-white/10 shadow-xl flex flex-col justify-center items-center text-white text-center">
+          <h2 className="font-bold text-xl">Are you sure you want to permanently delete this project?</h2>
+          <div className="pt-6 text-center flex gap-3">
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="px-8 py-3 rounded-xl bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 font-medium shadow-lg hover:shadow-orange-500/25 cursor-pointer"
+            >
+              No
+            </button>
+
+            <button
+              onClick={() => deleteProject(projectID)}
+              className="px-8 py-3 rounded-xl bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 font-medium shadow-lg hover:shadow-orange-500/25 cursor-pointer"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (select) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-brain-black relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-orange-500/5 to-transparent" />
+
+        <div className="relative space-y-1 w-full max-w-md mx-auto p-8 rounded-2xl bg-black/40 backdrop-blur-sm border border-white/10 shadow-xl">
+          <div
+            onClick={() => openProject(projectID)}
+            className="group flex items-center gap-4 p-4 rounded-xl hover:bg-orange-500/10 transition-all duration-300 cursor-pointer"
+          >
+            <div className="p-3 rounded-lg bg-orange-500/20 group-hover:bg-orange-500/30 transition-colors">
+              <FaPenFancy size={24} className="text-orange-500" />
+            </div>
+            <span className="text-lg font-medium text-white group-hover:text-orange-500 transition-colors">
+              Create smart notes
+            </span>
+          </div>
+
+          <div className="group flex items-center gap-4 p-4 rounded-xl hover:bg-orange-500/10 transition-all duration-300 cursor-pointer">
+            <div className="p-3 rounded-lg bg-orange-500/20 group-hover:bg-orange-500/30 transition-colors">
+              <FaPodcast size={24} className="text-orange-500" />
+            </div>
+            <span className="text-lg font-medium text-white group-hover:text-orange-500 transition-colors">
+              Tune into a podcast
+            </span>
+          </div>
+
+          <div className="group flex items-center gap-4 p-4 rounded-xl hover:bg-orange-500/10 transition-all duration-300 cursor-pointer">
+            <div className="p-3 rounded-lg bg-orange-500/20 group-hover:bg-orange-500/30 transition-colors">
+              <FaQuestionCircle size={24} className="text-orange-500" />
+            </div>
+            <span className="text-lg font-medium text-white group-hover:text-orange-500 transition-colors">
+              Challenge yourself with a test
+            </span>
+          </div>
+
+          <div className="pt-2 text-center">
+            <button
+              onClick={() => setSelect(false)}
+              className="px-5 py-2 rounded-xl bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 font-medium shadow-lg hover:shadow-orange-500/25 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-900 w-full">
       <main className="max-w-7xl mx-auto px-6 py-12">
@@ -376,20 +456,22 @@ const HomePage = () => {
                     <h4 className="text-lg font-semibold text-white mb-2">
                       {project.name}
                     </h4>
-                    <div className="mt-6 text-sm flex justify-between items-center">
+                    <div className="mt-6 text-[14px] flex justify-between items-center">
                       <p
-                        className="flex items-center gap-1 cursor-pointer text-gray-600 hover:text-red-700 duration-200 transition-all ease-in-out transform hover:scale-110"
+                        className="flex items-center gap-1 cursor-pointer text-gray-500 hover:text-red-700 duration-200 transition-all ease-in-out transform hover:scale-110"
                         onClick={() => {
-                          deleteProject(project.id);
+                          setProjectID(project.id);
+                          setConfirmDelete(true);
                         }}
                       >
-                        <FaTrash className="text-xl" />
-                        <span className="">Delete Project</span>
+                        <FaTrash className="text-sm" />
+                        <span className="">Delete</span>
                       </p>
 
                       <p
                         onClick={() => {
-                          openProject(project.id);
+                          setProjectID(project.id);
+                          setSelect(true);
                         }}
                         className="text-orange-500 text-lg hover:text-orange-700 cursor-pointer transition-all duration-200 ease-in-out font-semibold"
                       >

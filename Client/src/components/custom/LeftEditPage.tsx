@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/card";
 import {
@@ -11,6 +11,7 @@ import {
   Eraser,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { RiGeminiLine } from "react-icons/ri";
 
 const LeftEditPage = () => {
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -23,6 +24,13 @@ const LeftEditPage = () => {
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
+  };
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+
+  const handleSubmit = () => {
+    console.log("Question:", question);
+    setOpen(false);
   };
   const showConfirmToast = () => {
     toast(
@@ -58,6 +66,50 @@ const LeftEditPage = () => {
       }
     );
   };
+  if (open) {
+    return (
+      <div className="flex flex-col items-center rounded-2xl h-screen p-4 gap-4 bg-[#1A1F2C] border border-white/30 max-[850px]:w-full ">
+        <div className="bg-black rounded-xl py-6 px-8 min-w-[90%] w-auto flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-center">
+            Ask Your Question
+          </h2>
+          <input
+            type="text"
+            placeholder="Type your question..."
+            className="border p-2 rounded-md focus:outline-orange-500"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+          <p className="hidden">
+            <strong>Answer:</strong> Lorem ipsum dolor, sit amet consectetur
+            adipisicing elit. Consequatur corrupti eum eligendi sunt mollitia
+            perspiciatis cumque cum praesentium, autem voluptatum? Lorem ipsum
+            dolor sit amet consectetur adipisicing elit. Ut, sed cum omnis
+            similique adipisci et suscipit repellat architecto ducimus.
+            Doloremque exercitationem, animi labore quis repellat alias maxime
+            id, voluptatum accusantium rem delectus impedit! Adipisci ipsum
+            facere inventore sunt labore unde illo magni, voluptatum eum
+            accusantium, porro doloribus assumenda, id in.
+          </p>
+          <div className="flex justify-end gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              className=" cursor-pointer hover:bg-gray-600"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
+            >
+              Submit
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <Card className="flex flex-col items-center rounded-2xl  h-screen max-[850px]:w-full p-4 gap-4 bg-[#1A1F2C] border border-white/30">
       {/* Toolbar */}
@@ -125,6 +177,16 @@ const LeftEditPage = () => {
         <Button
           variant="ghost"
           size="icon"
+          onClick={() => setOpen(true)}
+          className="hover:bg-orange-500/20 hover:text-orange-500 cursor-pointer"
+          title="Ask Question"
+        >
+          <RiGeminiLine className="bg-gradient-to-b  text-red-400" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={showConfirmToast}
           className="hover:bg-red-500/20 hover:text-red-500 ml-auto cursor-pointer"
           title="Clear text"
@@ -137,6 +199,7 @@ const LeftEditPage = () => {
       <div
         ref={editorRef}
         contentEditable
+        spellCheck="false"
         className="w-full h-full p-4 rounded-xl border border-white/20 bg-black/20 backdrop-blur-sm overflow-y-auto outline-none text-xl focus:ring-2 focus:ring-orange-500/50 transition-all empty:before:content-[attr(data-placeholder)] empty:before:text-gray-500 empty:before:pointer-events-none"
         style={{ minHeight: "400px" }}
         data-placeholder="Type your notes here..."
