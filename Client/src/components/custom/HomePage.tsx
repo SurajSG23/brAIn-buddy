@@ -23,7 +23,6 @@ const loadingStates = [
   { text: "Saving your project..." },
 ];
 
-
 const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -94,7 +93,7 @@ const HomePage = () => {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project. Please try again.");
     } finally {
-      setConfirmDelete(false)
+      setConfirmDelete(false);
       setLoadingPage(false);
     }
   };
@@ -211,6 +210,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
+    setLoadingPage(true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(
         user
@@ -228,6 +228,8 @@ const HomePage = () => {
           fetchProjects(userFound.data._id);
         } catch (error) {
           console.error("Error fetching user:", error);
+        } finally {
+          setLoadingPage(false);
         }
       }
     });
@@ -263,7 +265,9 @@ const HomePage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-brain-black relative">
         <div className="relative space-y-1 w-full max-w-md mx-auto p-8 rounded-2xl bg-black/40 backdrop-blur-sm border border-white/10 shadow-xl flex flex-col justify-center items-center text-white text-center">
-          <h2 className="font-bold text-xl">Are you sure you want to permanently delete this project?</h2>
+          <h2 className="font-bold text-xl">
+            Are you sure you want to permanently delete this project?
+          </h2>
           <div className="pt-6 text-center flex gap-3">
             <button
               onClick={() => setConfirmDelete(false)}

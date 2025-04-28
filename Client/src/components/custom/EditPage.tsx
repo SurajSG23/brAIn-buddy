@@ -3,32 +3,43 @@ import LeftEditPage from "./LeftEditPage";
 import RightEditPage from "./RightEditPage";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/firebaseConfig";
 
 const EditPage = () => {
   const navigate = useNavigate();
   const [pdfURL, setPdfURL] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [loadingPage, setLoadingPage] = useState(true);
-  const [txtURL,setTxtURL] = useState<string>("");
+  const [txtURL, setTxtURL] = useState<string>("");
 
   useEffect(() => {
-    setLoadingPage(true);
-    const fetchProjects = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/project/openedProject`
-        );
-        setPdfURL(res.data[0].originalPDF);
-        setTitle(res.data[0].title);
-        setTxtURL(res.data[0].convertedPDF);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoadingPage(false);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoadingPage(true);
+      if (user?.email) {
+        try {
+          const userFound = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${user.email}`
+          );
+          const res = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/project/openedProject/${
+              userFound.data._id
+            }`
+          );
+          setPdfURL(res.data[0].originalPDF);
+          setTitle(res.data[0].title);
+          setTxtURL(res.data[0].convertedPDF);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        } finally {
+          setLoadingPage(false);
+        }
       }
-    };
-    fetchProjects();
+    });
+
+    return () => unsubscribe();
   }, [navigate]);
+
   if (loadingPage) {
     return (
       <>

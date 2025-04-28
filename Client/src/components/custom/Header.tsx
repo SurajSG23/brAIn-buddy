@@ -12,6 +12,8 @@ const Header = () => {
   const location = useLocation();
   const [displayPic, setDisplayPic] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [id, setId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const handleLogout = async () => {
     try {
@@ -25,17 +27,26 @@ const Header = () => {
   useEffect(() => {
     setLoading(true);
     try {
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
         if (!currentUser) {
           navigate("/");
         }
+        const userFound = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${
+            currentUser?.email
+          }`
+        );
+        setId(userFound.data._id);
+
         if (currentUser) {
           setDisplayPic(currentUser?.photoURL);
           setDisplayName(currentUser?.displayName);
+          setEmail(currentUser?.email);
         }
       });
       return () => unsubscribe();
     } catch (error) {
+      console.log(email);
       console.error("Error fetching user data:", error);
     } finally {
       setLoading(false);
@@ -51,7 +62,7 @@ const Header = () => {
   const closeProject = async () => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/project/closeproject`
+        `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${id}`
       );
       navigate("/homepage");
     } catch (error) {

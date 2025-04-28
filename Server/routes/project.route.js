@@ -31,10 +31,11 @@ router.post("/openproject/:id", async (req, res) => {
   }
 });
 
-router.post("/closeproject", async (req, res) => {
+router.post("/closeproject/:id", async (req, res) => {
   try {
     await projectModel.findOneAndUpdate(
       {
+        user: req.params.id,
         isOpen: true,
       },
       {
@@ -59,15 +60,23 @@ router.get("/getprojects/:id", async (req, res) => {
   }
 });
 
-router.get("/openedProject", async (req, res) => {
+router.get("/", async (req, res) => {
+  res.send("Project route");
+});
+
+router.get("/openedProject/:id", async (req, res) => {
+  console.log(req.params.id)
   try {
-    const project = await projectModel.find({ isOpen: true });
-    res.send(project);
+    const project = await projectModel.findOne({
+      user: req.params.id,
+      isOpen: true,
+    });
+    console.log(project)
+    res.send(project ? [project] : []);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
 router.delete("/deleteproject/:id", async (req, res) => {
   try {
     const { id } = req.params;
