@@ -9,6 +9,7 @@ const EditPage = () => {
   const [pdfURL, setPdfURL] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [loadingPage, setLoadingPage] = useState(true);
+  const [txtURL,setTxtURL] = useState<string>("");
 
   useEffect(() => {
     setLoadingPage(true);
@@ -19,6 +20,7 @@ const EditPage = () => {
         );
         setPdfURL(res.data[0].originalPDF);
         setTitle(res.data[0].title);
+        setTxtURL(res.data[0].convertedPDF);
       } catch (err) {
         console.log(err);
       } finally {
@@ -43,7 +45,7 @@ const EditPage = () => {
   return (
     <div className="flex flex-row w-full justify-evenly items-center text-white gap-1 max-[850px]:flex-col">
       <div className="w-[50%] max-[850px]:w-full">
-        <LeftEditPage />
+        <LeftEditPage txtURL={txtURL} />
       </div>
       <div className="w-[50%] max-[850px]:w-full">
         <RightEditPage title={title} pdfURL={pdfURL} />
