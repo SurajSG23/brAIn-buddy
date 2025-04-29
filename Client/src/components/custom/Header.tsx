@@ -34,7 +34,8 @@ const Header = () => {
         const userFound = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${
             currentUser?.email
-          }`
+          }`,
+          { withCredentials: true }
         );
         setId(userFound.data._id);
 
@@ -62,7 +63,8 @@ const Header = () => {
   const closeProject = async () => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${id}`,
+        { withCredentials: true }
       );
       navigate("/homepage");
     } catch (error) {

@@ -55,7 +55,8 @@ const HomePage = () => {
     setLoadingPage(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/project/getprojects/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/getprojects/${id}`,
+        { withCredentials: true }
       );
       const projectsData = response.data.map(
         (project: {
@@ -87,7 +88,8 @@ const HomePage = () => {
     setLoadingPage(true);
     try {
       await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/project/deleteproject/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/deleteproject/${id}`,
+        { withCredentials: true }
       );
       toast.success("Project deleted successfully!");
       fetchProjects(userId);
@@ -125,7 +127,8 @@ const HomePage = () => {
 
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/uploadimagekit/upload-pdf`,
-          formData
+          formData,
+          { withCredentials: true }
         );
 
         pdfUrl = response.data.data.url;
@@ -219,7 +222,8 @@ const HomePage = () => {
             title: title.charAt(0).toUpperCase() + title.slice(1),
             fileIdFromImageKit: pdfID,
             podcastURL: podcastURL,
-          }
+          },
+          { withCredentials: true }
         );
 
         setProjects([]);
@@ -250,7 +254,10 @@ const HomePage = () => {
       if (user?.email) {
         try {
           const userFound = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${user.email}`
+            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${
+              user.email
+            }`,
+            { withCredentials: true }
           );
           setUserId(userFound.data._id);
 
@@ -269,7 +276,8 @@ const HomePage = () => {
   const openProject = async (id: string) => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`,
+        { withCredentials: true }
       );
       navigate("/editpage", { replace: true });
     } catch (error) {
@@ -280,7 +288,8 @@ const HomePage = () => {
   const openProject2 = async (id: string) => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`,
+        { withCredentials: true }
       );
       navigate("/podcast", { replace: true });
     } catch (error) {
@@ -291,7 +300,8 @@ const HomePage = () => {
   const openProject3 = async (id: string) => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`,
+        { withCredentials: true }
       );
       navigate("/testpage", { replace: true });
     } catch (error) {

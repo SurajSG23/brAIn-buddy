@@ -19,12 +19,16 @@ const EditPage = () => {
       if (user?.email) {
         try {
           const userFound = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${user.email}`
+            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${
+              user.email
+            }`,
+            { withCredentials: true }
           );
           const res = await axios.get(
             `${import.meta.env.VITE_BACKEND_URL}/project/openedProject/${
               userFound.data._id
-            }`
+            }`,
+            { withCredentials: true }
           );
           setPdfURL(res.data[0].originalPDF);
           setTitle(res.data[0].title);

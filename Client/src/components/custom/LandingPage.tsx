@@ -57,7 +57,8 @@ const LandingPage = () => {
           name,
           email,
           profilepic,
-        }
+        },
+        { withCredentials: true }
       );
       console.log("User data sent to server:", response.data);
       toast.success("Logged in successfully!");

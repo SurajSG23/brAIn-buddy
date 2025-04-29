@@ -26,20 +26,27 @@ const PodcastPage = () => {
   const [loadingPage, setLoadingPage] = useState(false);
 
   useEffect(() => {
-    setLoadingPage(true)
+    setLoadingPage(true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user?.email) {
         try {
           const userFound = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${user.email}`
+            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${
+              user.email
+            }`,
+            { withCredentials: true }
           );
           const res = await axios.get(
             `${import.meta.env.VITE_BACKEND_URL}/project/openedProject/${
               userFound.data._id
-            }`
+            }`,
+            { withCredentials: true }
           );
           await axios.post(
-            `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${userFound.data._id}`
+            `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${
+              userFound.data._id
+            }`,
+            { withCredentials: true }
           );
           const extractedText = await fetch(res.data[0].podcastURL);
           const text = await extractedText.text();
@@ -48,8 +55,8 @@ const PodcastPage = () => {
           );
         } catch (error) {
           console.error("Error fetching user:", error);
-        } finally{
-          setLoadingPage(false)
+        } finally {
+          setLoadingPage(false);
         }
       }
     });
