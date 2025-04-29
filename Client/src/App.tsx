@@ -8,6 +8,7 @@ import Footer from "./components/custom/Footer";
 import HomePage from "./components/custom/HomePage";
 import EditPage from "./components/custom/EditPage";
 import PodcastPage from "./components/custom/PodcastPage";
+import TestPage from "./components/custom/TestPage";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/homepage" element={<HomePage />} />
           <Route path="/editpage" element={<EditPage />} />
           <Route path="/podcast" element={<PodcastPage />} />
+          <Route path="/testpage" element={<TestPage />} />
         </Routes>
         <Footer />
       </div>

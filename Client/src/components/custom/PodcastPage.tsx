@@ -38,14 +38,14 @@ const PodcastPage = () => {
               userFound.data._id
             }`
           );
-          console.log(res.data[0].podcastURL);
-
+          await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${userFound.data._id}`
+          );
           const extractedText = await fetch(res.data[0].podcastURL);
           const text = await extractedText.text();
           setConversationArray(
             JSON.parse(text.replace("```json", "").replace("```", ""))
           );
-          console.log(conversationArray);
         } catch (error) {
           console.error("Error fetching user:", error);
         } finally{
