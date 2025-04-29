@@ -32,7 +32,7 @@ const HomePage = () => {
   const [projects, setProjects] = useState<
     { id: string; name: string; date: string; url: string }[]
   >([]);
-  const [loadingPage, setLoadingPage] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
   const [user, setUser] = useState<{
     displayName: string;
     email: string;
