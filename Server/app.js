@@ -6,7 +6,7 @@ import uploadRouter from "./routes/uploadimagekit.route.js";
 import projectRouter from "./routes/project.route.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
-import bodyParser from "body-parser"; 
+import bodyParser from "body-parser";
 
 connectDB();
 dotenv.config();
@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.use(
   cors({
-    origin: ["http://localhost:5173","https://brainbuddy.vercel.app"],
+    origin: ["*"],
     credentials: true,
   })
 );
