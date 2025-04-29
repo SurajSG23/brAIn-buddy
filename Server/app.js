@@ -20,11 +20,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: [
-      "https://brainbuddy.vercel.app",
-      "http://localhost:5173",
-      "https://brainbuddy-5q40o2qjw-surajsg23s-projects.vercel.app/",
-    ],
+    origin: ["https://brainbuddy.vercel.app", "http://localhost:5173"],
     credentials: true,
   })
 );
