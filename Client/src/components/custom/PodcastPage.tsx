@@ -5,67 +5,13 @@ import { Card, CardContent } from "../ui/card";
 import { toast } from "sonner";
 import { MdLogout } from "react-icons/md";
 import { Link } from "react-router-dom";
-
-const conversationArray = [
-  {
-    speaker: "male",
-    text: "So, this project, 'Shopy Zone', is an e-commerce product listing website, right?",
-  },
-  {
-    speaker: "female",
-    text: "Exactly! It's Suraj's first project for IntrnForte's Full Stack Web Development course.",
-  },
-  {
-    speaker: "male",
-    text: "And it focuses on three main categories: Electronics, Clothing, and Accessories.",
-  },
-  {
-    speaker: "female",
-    text: "Yes, letting users browse products within their chosen category.",
-  },
-  {
-    speaker: "male",
-    text: "The tech stack is interesting. ReactJS with Vite, Bootstrap for styling, and Vercel/GitHub for deployment.",
-  },
-  {
-    speaker: "female",
-    text: "He used Styled Components for styling, avoiding extra folders. Pretty efficient!",
-  },
-  {
-    speaker: "male",
-    text: "The functionality includes a search bar and product filtering options for a better user experience.",
-  },
-  {
-    speaker: "female",
-    text: "And the UI is enhanced with React Icons, adding visual appeal.",
-  },
-  {
-    speaker: "male",
-    text: "The screenshots show a clear header, body, and footer structure—a well-organized homepage.",
-  },
-  {
-    speaker: "female",
-    text: "The footer even includes social media links for easy contact with the developer.",
-  },
-  {
-    speaker: "male",
-    text: "One challenge he mentioned was making the site responsive across different devices.",
-  },
-  {
-    speaker: "female",
-    text: "That's a common hurdle. Responsive design often takes a lot more time.",
-  },
-  {
-    speaker: "male",
-    text: "Deployment was another challenge, but he successfully hosted it on Vercel.",
-  },
-  {
-    speaker: "female",
-    text: "Overall, it sounds like a successful first project, focusing on user-friendliness and efficient navigation.",
-  },
-];
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/firebaseConfig";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const PodcastPage = () => {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
   const [synth, setSynth] = useState<SpeechSynthesis | null>(null);
@@ -74,6 +20,43 @@ const PodcastPage = () => {
     null
   );
   const [isPlaying, setIsPlaying] = useState(false);
+  const [conversationArray, setConversationArray] = useState<
+    { text: string; speaker: string }[]
+  >([]);
+  const [loadingPage, setLoadingPage] = useState(false);
+
+  useEffect(() => {
+    setLoadingPage(true)
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user?.email) {
+        try {
+          const userFound = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/register/getuser/${user.email}`
+          );
+          const res = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/project/openedProject/${
+              userFound.data._id
+            }`
+          );
+          console.log(res.data[0].podcastURL);
+
+          const extractedText = await fetch(res.data[0].podcastURL);
+          const text = await extractedText.text();
+          setConversationArray(
+            JSON.parse(text.replace("```json", "").replace("```", ""))
+          );
+          console.log(conversationArray);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        } finally{
+          setLoadingPage(false)
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const synth = window.speechSynthesis;
@@ -141,6 +124,19 @@ const PodcastPage = () => {
       speakText(current.text, current.speaker);
     }
   };
+
+  if (loadingPage) {
+    return (
+      <>
+        <div className="flex absolute top-0 justify-center items-center h-screen bg-gray-900 w-full z-99 ">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
+            <p className="text-white mt-4 text-lg font-semibold">Loading...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen p-4 bg-brain-black text-white">

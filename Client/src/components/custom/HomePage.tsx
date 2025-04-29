@@ -277,6 +277,17 @@ const HomePage = () => {
     }
   };
 
+  const openProject2 = async (id: string) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/project/openproject/${id}`
+      );
+      navigate("/podcast", { replace: true });
+    } catch (error) {
+      console.error("Error opening project:", error);
+    }
+  };
+
   if (loadingPage) {
     return (
       <>
@@ -334,7 +345,10 @@ const HomePage = () => {
             </span>
           </div>
 
-          <div className="group flex items-center gap-4 p-4 rounded-xl hover:bg-orange-500/10 transition-all duration-300 cursor-pointer">
+          <div
+            onClick={() => openProject2(projectID)}
+            className="group flex items-center gap-4 p-4 rounded-xl hover:bg-orange-500/10 transition-all duration-300 cursor-pointer"
+          >
             <div className="p-3 rounded-lg bg-orange-500/20 group-hover:bg-orange-500/30 transition-colors">
               <FaPodcast size={24} className="text-orange-500" />
             </div>
