@@ -102,16 +102,7 @@ const Header = () => {
               title={displayName ? displayName : "User"}
             />
           </div>
-          {location.pathname === "/editpage" ? (
-            <button
-              className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
-              onClick={() => {
-                closeProject();
-              }}
-            >
-              <MdLogout /> Back
-            </button>
-          ) : (
+          {location.pathname === "/homepage" ? (
             <button
               className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
               onClick={() => {
@@ -119,6 +110,15 @@ const Header = () => {
               }}
             >
               <MdLogout /> Logout
+            </button>
+          ) : (
+            <button
+              className="bg-orange-700 text-white font-semibold px-3 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200 flex justify-center items-center gap-1 shadow-md cursor-pointer text-sm"
+              onClick={() => {
+                closeProject();
+              }}
+            >
+              <MdLogout /> Back
             </button>
           )}
         </div>

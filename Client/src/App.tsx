@@ -7,6 +7,7 @@ import Header from "./components/custom/Header";
 import Footer from "./components/custom/Footer";
 import HomePage from "./components/custom/HomePage";
 import EditPage from "./components/custom/EditPage";
+import PodcastPage from "./components/custom/PodcastPage";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/homepage" element={<HomePage />} />
           <Route path="/editpage" element={<EditPage />} />
+          <Route path="/podcast" element={<PodcastPage />} />
         </Routes>
         <Footer />
       </div>
