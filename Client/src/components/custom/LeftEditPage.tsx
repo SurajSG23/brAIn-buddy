@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { RiGeminiLine } from "react-icons/ri";
 import GeminiQuestion from "../../gemini/QuestionPrompt";
 import { AIchatSession } from "../../gemini/AiModel";
-import { FaDownload, FaMicrophone, FaStop } from "react-icons/fa";
+import { FaDownload, FaMicrophone, FaPause } from "react-icons/fa";
 import { Document, Paragraph, TextRun, Packer } from "docx";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -60,7 +60,9 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
   }, []);
 
   const handleAdd = () => {
-    const newText = `<br/> <b>${question}</b> <br/><b>Answer:</b> ${geminiAnswer}<br/>`;
+    const newText = `<br/> <b>${
+      question.charAt(0).toUpperCase() + question.slice(1)
+    }</b> <br/><b>Answer:</b> ${geminiAnswer}<br/>`;
 
     if (editorRef.current) {
       const existingContent = editorRef.current.innerHTML;
@@ -75,9 +77,13 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
     setOpen(false);
   };
 
+  useEffect(() => {
+    setQuestion(transcript);
+  }, [transcript]);
+
   const handleSubmit = async () => {
     setLoading(true);
-
+    setOpen(false);
     try {
       const res = await fetch(txtURL);
       const text = await res.text();
@@ -95,6 +101,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
     } finally {
       setAccept(true);
       setLoading(false);
+      setOpen(true);
     }
   };
 
@@ -236,93 +243,8 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
       }
     );
   };
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center rounded-2xl h-screen p-4 gap-4 bg-[#1A1F2C] border border-white/30 max-[850px]:w-full ">
-        <div className="flex top-0 justify-center items-center h-screen bg-gray-900 w-full z-99 ">
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
-            <p className="text-white mt-4 text-lg font-semibold">
-              Working on your answer...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  if (open) {
-    return (
-      <div className="flex flex-col items-center rounded-2xl h-screen p-4 gap-4 bg-[#1A1F2C] border border-white/30 max-[850px]:w-full ">
-        <div className="bg-black rounded-xl py-6 px-8 min-w-[90%] w-auto flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-center">
-            Ask Your Question
-          </h2>
-          <input
-            type="text"
-            placeholder="Type your question..."
-            className="border p-2 rounded-md focus:outline-orange-500"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            required
-          />
-          <p>{geminiAnswer ? <strong>Answer: {geminiAnswer} </strong> : ""}</p>
-
-          <div className="flex justify-between gap-4 items-center">
-            {accept ? (
-              <div className="flex justify-end w-full">
-                <Button
-                  onClick={handleAdd}
-                  className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
-                >
-                  Add
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div
-                  className="bg-orange-500/30 rounded-full p-3 cursor-pointer hover:bg-orange-500 duration-100 flex justify-center items-center gap-1 text-sm"
-                  onClick={() => SpeechRecognition.startListening()}
-                >
-                  {listening ? (
-                    <div
-                      className="flex justify-center items-center gap-1"
-                      onClick={() => {
-                        setQuestion(transcript);
-                        SpeechRecognition.stopListening();
-                      }}
-                    >
-                      <FaStop /> Listening...
-                    </div>
-                  ) : (
-                    <FaMicrophone />
-                  )}
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setOpen(false)}
-                    className=" cursor-pointer hover:bg-gray-600"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    onClick={handleSubmit}
-                    className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Card className="flex flex-col items-center rounded-2xl  h-screen max-[850px]:w-full p-4 gap-4 bg-[#1A1F2C] border border-white/30">
+    <Card className="flex flex-col items-center rounded-2xl overflow-y-hidden  h-screen max-[850px]:w-full p-4 gap-4 bg-[#1A1F2C] border border-white/30">
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2 w-full bg-black/20 p-3 rounded-xl backdrop-blur-sm">
         <Button
@@ -398,7 +320,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setOpen(true)}
+          onClick={() => setOpen((prev) => !prev)}
           className="hover:bg-orange-500/20 hover:text-orange-500 cursor-pointer"
           title="Ask Question"
         >
@@ -416,17 +338,102 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
         </Button>
       </div>
 
+      {loading && (
+        <div className="bg-black rounded-xl py-6 px-8 w-full min-w-[90%] flex flex-col gap-4">
+          <div className="flex flex-col items-center">
+            <div className="w-14 h-14 border-4 border-transparent border-t-orange-500 border-b-orange-500 rounded-full animate-spin"></div>
+            <p className="text-white mt-4 text-lg font-semibold">
+              Working on your answer...
+            </p>
+          </div>
+        </div>
+      )}
+      {open && (
+        <div className="bg-black rounded-xl w-full py-6 px-8 min-w-[90%] flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-center">
+            Ask Your Question
+          </h2>
+          <input
+            type="text"
+            placeholder="Type your question..."
+            className="border p-2 rounded-md focus:outline-orange-500"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            required
+          />
+          <p>{geminiAnswer ? <strong>Answer: {geminiAnswer} </strong> : ""}</p>
+
+          <div className="flex justify-between gap-4 items-center">
+            {accept ? (
+              <div className="flex justify-end w-full">
+                <Button
+                  onClick={handleAdd}
+                  className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
+                >
+                  Add
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="bg-orange-500/30 rounded-full p-3 cursor-pointer hover:bg-orange-500 duration-100 flex justify-center items-center gap-1 text-sm"
+                  onClick={() => SpeechRecognition.startListening()}
+                >
+                  {listening ? (
+                    <div
+                      className="flex justify-center items-center gap-1"
+                      onClick={() => {
+                        SpeechRecognition.stopListening();
+                      }}
+                    >
+                      <FaPause /> Listening...
+                    </div>
+                  ) : (
+                    <FaMicrophone />
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setQuestion("");
+                      setOpen(false);
+                    }}
+                    className=" cursor-pointer hover:bg-gray-600"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    onClick={() => {
+                      handleSubmit();
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
       {/* Editor */}
       <div
         ref={editorRef}
         contentEditable
-        spellCheck="false"
-        className="w-full h-full p-4 rounded-xl border border-white/20 bg-black/20 backdrop-blur-sm overflow-y-auto outline-none text-md focus:ring-2 focus:ring-orange-500/50 transition-all empty:before:content-[attr(data-placeholder)] empty:before:text-gray-500 empty:before:pointer-events-none"
-        style={{ minHeight: "300px" }}
-        data-placeholder="Type your notes here..."
+        spellCheck={false}
         suppressContentEditableWarning
+        data-placeholder="Type your notes here..."
         onInput={handleInput}
         onBlur={handleInput}
+        className="
+    w-full h-full p-4 rounded-xl border border-white/20 
+    bg-black/20 backdrop-blur-sm overflow-y-auto outline-none text-md 
+    focus:ring-2 focus:ring-orange-500/50 transition-all 
+    empty:before:content-[attr(data-placeholder)] 
+    empty:before:text-gray-500 empty:before:pointer-events-none
+  "
       />
     </Card>
   );
