@@ -14,8 +14,11 @@ import { toast } from "react-toastify";
 import { RiGeminiLine } from "react-icons/ri";
 import GeminiQuestion from "../../gemini/QuestionPrompt";
 import { AIchatSession } from "../../gemini/AiModel";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaMicrophone, FaStop } from "react-icons/fa";
 import { Document, Paragraph, TextRun, Packer } from "docx";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 interface RightEditPageProps {
   txtURL: string;
@@ -29,6 +32,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
   const [accept, setAccept] = useState(false);
   const [editorContent, setEditorContent] = useState<string>("");
   const lastHtml = useRef("");
+  const { transcript, listening } = useSpeechRecognition();
 
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -263,30 +267,52 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
           />
           <p>{geminiAnswer ? <strong>Answer: {geminiAnswer} </strong> : ""}</p>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-between gap-4 items-center">
             {accept ? (
-              <Button
-                onClick={handleAdd}
-                className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
-              >
-                Add
-              </Button>
-            ) : (
-              <>
+              <div className="flex justify-end w-full">
                 <Button
-                  variant="ghost"
-                  onClick={() => setOpen(false)}
-                  className=" cursor-pointer hover:bg-gray-600"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={handleSubmit}
+                  onClick={handleAdd}
                   className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
                 >
-                  Submit
+                  Add
                 </Button>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="bg-orange-500/30 rounded-full p-3 cursor-pointer hover:bg-orange-500 duration-100 flex justify-center items-center gap-1 text-sm"
+                  onClick={() => SpeechRecognition.startListening()}
+                >
+                  {listening ? (
+                    <div
+                      className="flex justify-center items-center gap-1"
+                      onClick={() => {
+                        setQuestion(transcript);
+                        SpeechRecognition.stopListening();
+                      }}
+                    >
+                      <FaStop /> Listening...
+                    </div>
+                  ) : (
+                    <FaMicrophone />
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setOpen(false)}
+                    className=" cursor-pointer hover:bg-gray-600"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    onClick={handleSubmit}
+                    className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
+                  >
+                    Submit
+                  </Button>
+                </div>
               </>
             )}
           </div>
@@ -294,6 +320,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
       </div>
     );
   }
+
   return (
     <Card className="flex flex-col items-center rounded-2xl  h-screen max-[850px]:w-full p-4 gap-4 bg-[#1A1F2C] border border-white/30">
       {/* Toolbar */}
