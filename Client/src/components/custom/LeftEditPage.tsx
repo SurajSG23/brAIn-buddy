@@ -244,7 +244,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
     );
   };
   return (
-    <Card className="flex flex-col items-center rounded-2xl overflow-y-hidden  h-screen max-[850px]:w-full p-4 gap-4 bg-[#1A1F2C] border border-white/30">
+    <Card className="flex flex-col items-center rounded-2xl overflow-y-auto  h-screen max-[850px]:w-full p-4 gap-4 bg-[#1A1F2C] border border-white/30">
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2 w-full bg-black/20 p-3 rounded-xl backdrop-blur-sm">
         <Button
