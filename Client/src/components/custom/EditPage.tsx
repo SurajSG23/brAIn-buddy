@@ -60,7 +60,7 @@ const EditPage = () => {
   return (
     <div className="flex flex-row w-full justify-evenly items-center text-white gap-1 max-[850px]:flex-col">
       <div className="w-[50%] max-[850px]:w-full">
-        <LeftEditPage txtURL={txtURL} />
+        <LeftEditPage txtURL={txtURL} title={title}/>
       </div>
       <div className="w-[50%] max-[850px]:w-full">
         <RightEditPage title={title} pdfURL={pdfURL} />

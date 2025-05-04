@@ -22,9 +22,10 @@ import SpeechRecognition, {
 
 interface RightEditPageProps {
   txtURL: string;
+  title: string;
 }
 
-const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
+const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL, title }) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -186,7 +187,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL }) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "Notes.docx";
+      a.download = `${title}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
