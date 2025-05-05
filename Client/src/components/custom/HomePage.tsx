@@ -350,7 +350,7 @@ const HomePage = () => {
   }
   if (select) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-brain-black relative">
+      <div className="flex w-full flex-col items-center justify-center min-h-screen bg-zinc-900 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-orange-500/5 to-transparent" />
 
         <div className="relative space-y-1 w-full max-w-md mx-auto p-8 rounded-2xl bg-black/40 backdrop-blur-sm border border-white/10 shadow-xl">
