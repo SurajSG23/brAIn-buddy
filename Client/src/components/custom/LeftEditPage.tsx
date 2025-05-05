@@ -377,7 +377,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL, title }) => {
             ) : (
               <>
                 <div
-                  className="bg-orange-500/30 rounded-full p-3 cursor-pointer hover:bg-orange-500 duration-100 flex justify-center items-center gap-1 text-sm"
+                  className="bg-orange-500/30 rounded-full p-3 cursor-pointer  transition-all duration-200 hover:bg-orange-500 flex justify-center items-center gap-1 text-sm"
                   onClick={() => SpeechRecognition.startListening()}
                 >
                   {listening ? (
