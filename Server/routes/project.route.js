@@ -13,7 +13,7 @@ router.post("/addproject", async (req, res) => {
       fileIdFromImageKit,
       podcastURL,
     } = req.body;
-    
+
     const updatedUser = await projectModel.create({
       user,
       originalPDF,
@@ -75,11 +75,12 @@ router.get("/", async (req, res) => {
 router.get("/openedProject/:id", async (req, res) => {
   console.log(req.params.id);
   try {
-    const project = await projectModel.findOne({
-      user: req.params.id,
-      isOpen: true,
-    });
-    console.log(project);
+    const project = await projectModel.findOne(
+      {
+        user: req.params.id,
+      },
+      { sort: { updatedAt: -1 } }
+    );
     res.send(project ? [project] : []);
   } catch (error) {
     res.status(500).json({ message: error.message });

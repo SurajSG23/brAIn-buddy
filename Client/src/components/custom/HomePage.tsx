@@ -64,7 +64,6 @@ const HomePage = () => {
           title: string;
           originalPDF: string;
           createdAt: string;
-          convertedPDF: string;
         }) => ({
           id: project._id,
           name: project.title,

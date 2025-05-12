@@ -30,6 +30,12 @@ const EditPage = () => {
             }`,
             { withCredentials: true }
           );
+          await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${
+              userFound.data._id
+            }`,
+            { withCredentials: true }
+          );
           setPdfURL(res.data[0].originalPDF);
           setTitle(res.data[0].title);
           setTxtURL(res.data[0].convertedPDF);
@@ -60,7 +66,7 @@ const EditPage = () => {
   return (
     <div className="flex flex-row w-full justify-evenly items-center text-white gap-1 max-[850px]:flex-col">
       <div className="w-[50%] max-[850px]:w-full">
-        <LeftEditPage txtURL={txtURL} title={title}/>
+        <LeftEditPage txtURL={txtURL} title={title} />
       </div>
       <div className="w-[50%] max-[850px]:w-full">
         <RightEditPage title={title} pdfURL={pdfURL} />

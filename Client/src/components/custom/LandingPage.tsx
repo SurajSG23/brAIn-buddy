@@ -51,7 +51,7 @@ const LandingPage = () => {
       const name = result.user.displayName;
       const email = result.user.email;
       const profilepic = result.user.photoURL;
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/register/signin`,
         {
           name,
@@ -60,7 +60,6 @@ const LandingPage = () => {
         },
         { withCredentials: true }
       );
-      console.log("User data sent to server:", response.data);
       toast.success("Logged in successfully!");
     } catch (error) {
       toast.error("Something went wrong!");
