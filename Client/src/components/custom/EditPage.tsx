@@ -30,6 +30,7 @@ const EditPage = () => {
             }`,
             { withCredentials: true }
           );
+          console.log(res.data)
           await axios.post(
             `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${
               userFound.data._id
