@@ -75,13 +75,10 @@ router.get("/", async (req, res) => {
 router.get("/openedProject/:id", async (req, res) => {
   console.log(req.params.id);
   try {
-    const project = await projectModel.findOne(
-      {
-        user: req.params.id,
-      },
-      { sort: { updatedAt: -1 } }
-    );
-    res.send(project ? [project] : []);
+    const project = await projectModel
+      .findOne({ user: req.params.id })
+      .sort({ updatedAt: -1 });
+    res.send(project);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
