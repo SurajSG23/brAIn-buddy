@@ -116,18 +116,11 @@ const TestPage = () => {
             }`,
             { withCredentials: true }
           );
-          await axios.post(
-            `${import.meta.env.VITE_BACKEND_URL}/project/closeproject/${
-              userFound.data._id
-            }`,
-            { withCredentials: true }
-          );
           const extractedText = await fetch(res.data[0].convertedPDF);
           const text = await extractedText.text();
           const updatedPrompt = TestPrompt.replace("#####", text);
           setNewPrompt(updatedPrompt);
           const result = await AIchatSession.sendMessage(updatedPrompt);
-          console.log(result.response?.candidates?.[0]?.content?.parts?.[0]?.text)
           const geminiQues =
             result.response?.candidates?.[0]?.content?.parts?.[0]?.text
               ?.split("<questions>")[1]

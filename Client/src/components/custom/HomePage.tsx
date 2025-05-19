@@ -191,7 +191,7 @@ const HomePage = () => {
         const blob = new Blob([fullText], { type: "text/plain" });
 
         const formData2 = new FormData();
-        formData2.append("file", blob, "extracted-text.txt");
+        formData2.append("file", blob, `${title}.txt`);
         formData2.append(
           "upload_preset",
           import.meta.env.VITE_CLOUD_PRESET_NAME
