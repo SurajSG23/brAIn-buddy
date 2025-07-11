@@ -167,7 +167,7 @@ const HomePage = () => {
         const blob = new Blob([GeminiPodcast], { type: "text/plain" });
 
         const formData2 = new FormData();
-        formData2.append("file", blob, "extracted-text.txt");
+        formData2.append("file", blob, "podcast-text.txt");
         formData2.append(
           "upload_preset",
           import.meta.env.VITE_CLOUD_PRESET_NAME
@@ -450,7 +450,7 @@ const HomePage = () => {
                   />
                 </div>
 
-                {title.length > 0 && (
+                {title && (
                   <>
                     <p className="text-gray-200 mt-8 mb-4">
                       Upload a PDF file that contains your study material.

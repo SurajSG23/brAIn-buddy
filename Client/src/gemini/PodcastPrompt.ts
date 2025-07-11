@@ -28,7 +28,7 @@ Example output:
   ...
 ]
 
-Input PDF content will be inside <text>###</text>.
+Input PDF content will be inside <text></text>.
 
 Only use the text between the tags. Do not reference the tags or the fact that it's a PDF. 
 Do not say things like “based on the PDF” — just deliver the conversation.

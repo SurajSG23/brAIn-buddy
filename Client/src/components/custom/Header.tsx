@@ -1,9 +1,8 @@
-import { useLocation } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -84,7 +83,7 @@ const Header = () => {
       </>
     );
   }
-
+  
   return (
     <header className="flex justify-between items-center bg-[#08090c] w-full p-3">
       <div className="flex items-center justify-center max-[395px]:w-[150px] max-[395px]:ml-3">

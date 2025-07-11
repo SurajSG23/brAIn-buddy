@@ -20,12 +20,12 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 
-interface RightEditPageProps {
+interface LeftEditPageProps {
   txtURL: string;
   title: string;
 }
 
-const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL, title }) => {
+const LeftEditPage: React.FC<LeftEditPageProps> = ({ txtURL, title }) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -38,6 +38,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL, title }) => {
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
   };
+
   const [geminiAnswer, setGeminiAnswer] = useState<string>("");
 
   const clearFormatting = () => {
@@ -321,7 +322,7 @@ const LeftEditPage: React.FC<RightEditPageProps> = ({ txtURL, title }) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => setOpen(!open)}
           className="hover:bg-orange-500/20 hover:text-orange-500 cursor-pointer"
           title="Ask Question"
         >
