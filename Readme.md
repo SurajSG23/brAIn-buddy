@@ -13,7 +13,8 @@ Brain Buddy is an AI-powered web app that lets users interact with PDFs intellig
 - **Frontend**: React + Vite  
 - **Backend**: Node.js + Express  
 - **Database**: MongoDB  
-- **AI**: Gemini API  
+- **AI**: Gemini API
+- **Authentication**: Firebase
 - **Cloud Providers**: ImageKit & Cloudinary  
 
 ## 🤝 Contributing
