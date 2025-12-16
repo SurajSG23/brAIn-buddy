@@ -14,6 +14,7 @@ import axios from "axios";
 import useDetectTabSwitch from "../custom/useDetectTabSwitch";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
+import { CrossIcon } from "lucide-react";
 
 const TestPage = () => {
   useDetectTabSwitch();
@@ -331,7 +332,7 @@ const TestPage = () => {
                         className="bg-gray-800 p-4 rounded-xl shadow-md border border-red-500/30"
                       >
                         <p className="text-white font-medium mb-1">
-                          ❌ Question {index + 1}
+                          <CrossIcon/> Questio {index + 1}
                         </p>
                         <p className="text-red-400">
                           Your Answer:{" "}

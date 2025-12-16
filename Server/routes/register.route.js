@@ -32,7 +32,7 @@ router.get("/getuser/:email", async (req, res) => {
     const { email } = req.params;
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.json({ message: "User not found", status: 404 });
+      return res.status(400).json({ message: "User not found"});
     }
     res.send(user);
   } catch (error) {
