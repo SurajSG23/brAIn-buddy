@@ -17,7 +17,7 @@ const Footer = () => {
           </div>
           <div className="text-gray-400 text-sm flex flex-col items-center justify-center gap-3 md:items-start ">
             <div className="flex flex-col space-y-2">
-              <h3 className="font-semibold text-white mb-2 mx-auto">Connect with me</h3>
+              {/* <h3 className="font-semibold text-white mb-2 mx-auto">Connect with me</h3> */}
               <div className="flex space-x-4">
                 {/* <Button
                   variant="ghost"
