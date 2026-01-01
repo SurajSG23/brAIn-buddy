@@ -9,7 +9,6 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
-  // Use a generally available, cost-efficient model
   model: "gemini-2.5-flash-lite",
 });
 

@@ -1,5 +1,5 @@
-import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
-import { Button } from "../ui/Button";
+// import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
+// import { Button } from "../ui/Button";
 
 const Footer = () => {
   return (
@@ -19,7 +19,7 @@ const Footer = () => {
             <div className="flex flex-col space-y-2">
               <h3 className="font-semibold text-white mb-2 mx-auto">Connect with me</h3>
               <div className="flex space-x-4">
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   className="hover:bg-gray-800 hover:text-orange-500"
@@ -65,7 +65,7 @@ const Footer = () => {
                   >
                     <FaGithub size={20} />
                   </a>
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
